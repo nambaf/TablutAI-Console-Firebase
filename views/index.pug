@@ -1,0 +1,62 @@
+extends layout
+
+block content
+  script(src='/javascripts/vis.js')
+  script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js')
+  h1= title
+  p Welcome to #{title}
+  
+  div#network
+
+  script.
+  
+    $.ajax({
+        url: "/getNodes",  // the local Node server
+        method: 'GET',
+        success: function(data){
+            
+            var recivedArray = data.treeKey;
+            var nodes = []
+            var edges = []
+            var count = 0
+
+            for (var key in recivedArray) {
+                nodes.push({id:key, label:"move "+recivedArray[key].move+ " Nsa "+ recivedArray[key].Nsa})
+                edges.push({from: recivedArray[key].parent , to: key , id:"e"+count})
+                count++
+            }
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+            // create a network
+            var container = document.getElementById('network');
+            var options = {
+                layout: {
+                    hierarchical: {
+                        direction: "UD",
+                        sortMethod: "directed"
+                    }
+                },
+                interaction: {dragNodes :false},
+                physics: {
+                    enabled: false
+                },
+                configure: {
+                filter: function (option, path) {
+                    if (path.indexOf('hierarchical') !== -1) {
+                        return true;
+                    }
+                    return false;
+                },
+                showButton:false
+                }
+            };
+            var network = new vis.Network(container, data, options);
+         }
+    });
+    
+
+  
+  
+  
